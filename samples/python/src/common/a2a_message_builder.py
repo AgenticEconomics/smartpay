@@ -14,8 +14,13 @@
 
 """A builder class for building an A2A Message object."""
 
-from typing import Any, Self
+from typing import Any
 import uuid
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
 
 from a2a import types as a2a_types
 
