@@ -24,12 +24,12 @@ help:
 # Build Docker images
 build:
 	@echo "🏗️  Building Docker images..."
-	docker-compose build
+	docker compose build
 
 # Start all services
 up:
 	@echo "🚀 Starting SmartPay services..."
-	docker-compose up -d
+	docker compose up -d
 	@echo ""
 	@echo "🌐 Service URLs:"
 	@echo "  Shopping Agent Web UI: http://localhost:8080"
@@ -43,17 +43,17 @@ up:
 # Stop all services
 down:
 	@echo "🛑 Stopping SmartPay services..."
-	docker-compose down
+	docker compose down
 
 # Restart all services
 restart:
 	@echo "🔄 Restarting SmartPay services..."
-	docker-compose restart
+	docker compose restart
 
 # Show service status
 status:
 	@echo "📊 SmartPay Service Status:"
-	docker-compose ps
+	docker compose ps
 	@echo ""
 	@echo "🏥 Health Check:"
 	@echo "  Web UI: $$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080 || echo "DOWN")"
@@ -64,19 +64,19 @@ status:
 # Show logs
 logs:
 	@echo "📋 Showing SmartPay logs..."
-	docker-compose logs -f
+	docker compose logs -f
 
 # Clean up Docker resources
 clean:
 	@echo "🧹 Cleaning up Docker resources..."
-	docker-compose down -v --remove-orphans
+	docker compose down -v --remove-orphans
 	docker system prune -f
 	@echo "✅ Cleanup completed!"
 
 # Development mode with live reload
 dev:
 	@echo "👨‍💻 Starting in development mode..."
-	docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+	docker compose -f docker-compose.yml -f docker-compose.override.yml up
 
 # Quick start (build + up)
 quick-start: build up
