@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # Base service with common configuration
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smartpay-base:latest
+    volumes:
+      - .:/app
+      - ./.logs:/app/.logs
+    environment:
+      - PYTHONPATH=/app/samples/python/src:/app
+    working_dir: /app
+    command: echo "Base service"
+
+  # Merchant Agent - handles product queries and cart management
+  merchant-agent:
+    depends_on:
+      - base
+    image: smartpay-base:latest
+    container_name: smartpay-merchant-agent
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/app
+      - ./.logs:/app/.logs
+    environment:
+      - PYTHONPATH=/app/samples/python/src:/app
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    working_dir: /app
+    command: python -m samples.python.src.roles.merchant_agent
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Credentials Provider Agent - manages user payment credentials
+  credentials-provider-agent:
+    depends_on:
+      - base
+    image: smartpay-base:latest
+    container_name: smartpay-credentials-provider
+    ports:
+      - "8002:8002"
+    volumes:
+      - .:/app
+      - ./.logs:/app/.logs
+    environment:
+      - PYTHONPATH=/app/samples/python/src:/app
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    working_dir: /app
+    command: python -m samples.python.src.roles.credentials_provider_agent
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Merchant Payment Processor Agent - handles payment processing
+  merchant-payment-processor-agent:
+    depends_on:
+      - base
+    image: smartpay-base:latest
+    container_name: smartpay-payment-processor
+    ports:
+      - "8003:8003"
+    volumes:
+      - .:/app
+      - ./.logs:/app/.logs
+    environment:
+      - PYTHONPATH=/app/samples/python/src:/app
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    working_dir: /app
+    command: python -m samples.python.src.roles.merchant_payment_processor_agent
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8003/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Shopping Agent - main orchestrator with ADK web interface
+  shopping-agent:
+    depends_on:
+      - merchant-agent
+      - credentials-provider-agent
+      - merchant-payment-processor-agent
+    image: smartpay-base:latest
+    container_name: smartpay-shopping-agent
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - ./.logs:/app/.logs
+    environment:
+      - PYTHONPATH=/app/samples/python/src:/app
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    working_dir: /app
+    command: adk web --host 0.0.0.0 --port 8080 samples/python/src/roles
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Optional: Watch logs service for debugging
+  log-watcher:
+    depends_on:
+      - shopping-agent
+    image: smartpay-base:latest
+    container_name: smartpay-log-watcher
+    volumes:
+      - ./.logs:/app/.logs
+    working_dir: /app
+    command: tail -f .logs/*.log
+    profiles:
+      - debug
+
+networks:
+  default:
+    driver: bridge
+    name: smartpay-network

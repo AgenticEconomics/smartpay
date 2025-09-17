@@ -1,0 +1,47 @@
+# Docker Compose Override Configuration
+# This file allows you to customize the SmartPay deployment
+# Copy settings here that you want to override from docker-compose.yml
+
+version: '3.8'
+
+services:
+  # Example: Override environment variables
+  merchant-agent:
+    environment:
+      - LOG_LEVEL=DEBUG
+      # Add any merchant-specific environment variables here
+
+  credentials-provider-agent:
+    environment:
+      - LOG_LEVEL=DEBUG
+      # Add any credentials-specific environment variables here
+
+  merchant-payment-processor-agent:
+    environment:
+      - LOG_LEVEL=DEBUG
+      # Add any payment-specific environment variables here
+
+  shopping-agent:
+    environment:
+      - LOG_LEVEL=DEBUG
+      # Add any shopping-specific environment variables here
+
+      # Example: Mount additional volumes for development
+      # shopping-agent:
+      #   volumes:
+      #     - ./custom-config:/app/config
+      #     - ./custom-data:/app/data
+
+      # Example: Override ports if they conflict
+      # merchant-agent:
+      #   ports:
+      #     - "18001:8001"
+      # credentials-provider-agent:
+      #   ports:
+      #     - "18002:8002"
+      # merchant-payment-processor-agent:
+      #   ports:
+      #     - "18003:8003"
+      # shopping-agent:
+      #   ports:
+      #     - "18080:8080"
