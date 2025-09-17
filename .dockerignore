@@ -56,6 +56,7 @@ watch.log
 # Documentation
 docs/_build/
 *.md
+!README.md
 !DOCKER_README.md
 
 # Temporary files

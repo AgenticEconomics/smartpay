@@ -2,8 +2,6 @@
 # This file allows you to customize the SmartPay deployment
 # Copy settings here that you want to override from docker-compose.yml
 
-version: '3.8'
-
 services:
   # Example: Override environment variables
   merchant-agent:

@@ -3,8 +3,9 @@ FROM python:3.11-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app/samples/python/src:/app
+ENV PYTHONPATH=/app/samples/python/src:/app:/app/.venv/lib/python3.11/site-packages
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -15,9 +16,13 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files
+# Copy dependency files and project structure
 COPY pyproject.toml .
+COPY README.md .
 COPY samples/python/pyproject.toml ./samples/python/
+COPY samples/python/README.md ./samples/python/
+COPY samples/python/src/ ./samples/python/src/
+COPY src/ ./src/
 COPY uv.lock .
 COPY requirements-docs.txt .
 
